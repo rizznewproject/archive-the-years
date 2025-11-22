@@ -106,6 +106,11 @@
             color: var(--navy);
         }
 
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
         /* --- ANIMATIONS --- */
         .fade-up {
             opacity: 0;
@@ -845,12 +850,23 @@
     <section id="gallery" class="section-padding">
         <div class="container">
             <div class="journey-header fade-up">
-                <h2>The Archive Gallery</h2>
-                <p style="color: var(--slate);">Momen yang tidak pernah kembali, tapi selamanya tinggal.</p>
+                <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:40px; flex-wrap:wrap; gap:20px;">
+                    <div style="text-align:left;">
+                        <h2 style="margin-bottom: 10px;">The Archive Gallery</h2>
+                        <p style="color: var(--slate);">Momen yang tidak pernah kembali, tapi selamanya tinggal.</p>
+                    </div>
+                    <!-- Tombol Upload Gallery -->
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSec-6li24sR5oXZFfg4X9d9ACKecjfhzJZfzOBzWcZEH30ZfA/viewform" target="_blank" class="btn btn-sm" style="display:flex; align-items:center; gap:8px;">
+                        <i data-lucide="camera" width="16"></i> Kirim Foto Momen
+                    </a>
+                </div>
             </div>
 
             <div class="gallery-grid" id="galleryGrid">
                 <!-- Images injected via JS -->
+                <div style="color:white; text-align:center;">
+                    <i data-lucide="loader" class="animate-spin"></i> Memuat arsip foto...
+                </div>
             </div>
         </div>
     </section>
@@ -867,8 +883,8 @@
                 <!-- Form Link -->
                 <div class="log-entry" style="background: #fff; margin-bottom: 30px; border-left: 5px solid var(--navy);">
                     <h3 style="color: var(--navy); font-family: 'Space Mono'; font-size: 1.2rem; margin-bottom: 15px;">TULIS PESAN DI LOGBOOK</h3>
-                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">Pesan yang Anda tulis di formulir pendaftaran akan otomatis muncul di sini setelah disetujui.</p>
-                    <a href="#upload" class="btn btn-primary" style="width: 100%; text-align:center; text-decoration:none;">Isi Formulir</a>
+                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">Pesan yang Anda tulis di formulir biodata akan otomatis muncul di sini setelah disetujui.</p>
+                    <a href="#upload" class="btn btn-primary" style="width: 100%; text-align:center; text-decoration:none;">Isi Formulir Biodata</a>
                 </div>
 
                 <!-- Messages Grid -->
@@ -883,7 +899,7 @@
     <section id="upload" class="section-padding upload-section">
         <div class="container">
             <div class="journey-header fade-up">
-                <h2>Upload Data</h2>
+                <h2>Upload Biodata</h2>
                 <p style="color: var(--slate);">Setiap kenangan yang kamu bagikan melengkapi arsip perjalanan ini.</p>
             </div>
 
@@ -896,9 +912,8 @@
                         Data Anda akan ditinjau admin sebelum ditampilkan di website.
                     </p>
                     
-                    <!-- PLACEHOLDER LINK FORM -->
-                    <!-- User Instruction: Ganti href dibawah ini dengan Link Google Form Anda -->
-                    <a href="https://forms.gle/b7scEJZQviD3UvGC9" target="_blank" class="btn btn-primary" style="font-size:1.1rem; padding:15px 40px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
+                    <!-- Link Google Form Biodata -->
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSclh-mDIIbp2hEGoXYGbWQd1RPZa99GqHMdX-gqdWpxiZmuog/viewform?usp=header" target="_blank" class="btn btn-primary" style="font-size:1.1rem; padding:15px 40px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
                         <i data-lucide="external-link" width="18"></i> BUKA GOOGLE FORM
                     </a>
                     
@@ -988,47 +1003,49 @@
         lucide.createIcons();
 
         // --- CONFIGURATION ---
-        // Link CSV Google Sheets yang Anda berikan
-        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUFeP2e54_CWmXMU06wrfSzUy93ZGMybdGfZsGAUwgD8tEdC1Io6UvkaczNKuUuftkuzN_VMNYKq2O/pub?gid=500349042&single=true&output=csv';
+        
+        // 1. CSV BIODATA (Updated)
+        const BIODATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUFeP2e54_CWmXMU06wrfSzUy93ZGMybdGfZsGAUwgD8tEdC1Io6UvkaczNKuUuftkuzN_VMNYKq2O/pub?output=csv';
+
+        // 2. CSV GALLERY (Updated & Fixed to CSV format)
+        // User provided: .../d/p -> we convert to .../pub?output=csv
+        const GALLERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQROLPYW3zigNZqc7o3qd9vBrSPW4PlXUSwRSZKW28iEeFQztQ9AskZlmC1nMn2Wl8e_ac4HOnb6L-d/pub?output=csv';
 
         let allProfiles = [];
 
-        // --- FETCH DATA FROM GOOGLE SHEETS ---
-        function fetchSheetData() {
-            Papa.parse(SHEET_CSV_URL, {
+        // --- HELPER: GOOGLE DRIVE LINK CONVERTER ---
+        function getDriveImage(url) {
+            if (!url) return '';
+            if (url.includes('drive.google.com')) {
+                const idMatch = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (idMatch) {
+                    return `https://lh3.googleusercontent.com/d/${idMatch[1]}`; 
+                }
+            }
+            return url;
+        }
+
+        // --- FETCH BIODATA ---
+        function fetchBiodata() {
+            Papa.parse(BIODATA_CSV_URL, {
                 download: true,
-                header: true, // Assumes first row is header
+                header: true, 
                 complete: function(results) {
-                    processSheetData(results.data);
+                    processBiodata(results.data);
                 },
                 error: function(err) {
-                    console.error("Error fetching Sheet:", err);
-                    document.getElementById('profilesGrid').innerHTML = '<p style="color:white;">Gagal memuat data. Coba refresh halaman.</p>';
+                    console.error("Error fetching Biodata:", err);
+                    document.getElementById('profilesGrid').innerHTML = '<p style="color:white;">Gagal memuat data profil.</p>';
                 }
             });
         }
 
-        function processSheetData(data) {
-            // Mapping data dari CSV ke format object aplikasi
-            // Kita mencari kolom yang sesuai dengan nama di Google Form
-            // Jika nama kolom di form berbeda, sesuaikan 'key' di sini.
-            
+        function processBiodata(data) {
             allProfiles = data.filter(row => {
-                // FILTER: Hanya ambil yang statusnya "Approved" (Case insensitive)
+                // Filter Status Approved
                 return row['Status'] && row['Status'].trim().toLowerCase() === 'approved';
             }).map((row, index) => {
-                
-                // Helper to fix Google Drive Image Links
-                let imgUrl = row['Upload Foto Profil'] || '';
-                if (imgUrl.includes('drive.google.com')) {
-                    // Convert 'open?id=' or 'file/d/' to direct link 'uc?export=view&id='
-                    // Better yet: lh3.googleusercontent.com for speed if possible, but uc export is standard fallback
-                    const idMatch = imgUrl.match(/id=([a-zA-Z0-9_-]+)/) || imgUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                    if (idMatch) {
-                        imgUrl = `https://lh3.googleusercontent.com/d/${idMatch[1]}`; 
-                    }
-                }
-                // Fallback placeholder
+                let imgUrl = getDriveImage(row['Upload Foto Profil'] || '');
                 if (!imgUrl) imgUrl = `https://i.pravatar.cc/400?img=${index + 1}`;
 
                 return {
@@ -1043,12 +1060,62 @@
                     message: row['Pesan untuk Kelas'] || '',
                     instagram: row['Instagram'] || '#',
                     img: imgUrl,
-                    timestamp: row['Timestamp'] // Google form usually adds this
+                    timestamp: row['Timestamp']
                 };
             });
 
             renderProfiles('all');
             renderMessages();
+        }
+
+        // --- FETCH GALLERY ---
+        function fetchGallery() {
+            Papa.parse(GALLERY_CSV_URL, {
+                download: true,
+                header: true, 
+                complete: function(results) {
+                    processGallery(results.data);
+                },
+                error: function(err) {
+                    console.error("Error fetching Gallery:", err);
+                    document.getElementById('galleryGrid').innerHTML = '<p style="color:white;">Gagal memuat galeri.</p>';
+                }
+            });
+        }
+
+        function processGallery(data) {
+            const galleryGrid = document.getElementById('galleryGrid');
+            galleryGrid.innerHTML = '';
+
+            // Ambil data yang valid (ada foto)
+            const validImages = data.filter(row => {
+                // Cek kolom yang mungkin berisi foto. Karena formnya simple, biasanya kolom ke-2 atau yang bernama "Upload"
+                // Kita cari value yang ada link drivenya
+                return Object.values(row).some(val => val && val.includes('drive.google.com'));
+            });
+
+            if (validImages.length === 0) {
+                galleryGrid.innerHTML = '<p style="color:white;">Belum ada foto di galeri.</p>';
+                return;
+            }
+
+            validImages.forEach((row, index) => {
+                // Cari kolom gambar secara dinamis
+                const imgLink = Object.values(row).find(val => val && val.includes('drive.google.com'));
+                const finalImg = getDriveImage(imgLink);
+
+                const item = document.createElement('div');
+                item.className = 'gallery-item fade-up';
+                item.innerHTML = `
+                    <img src="${finalImg}" alt="Gallery ${index}" loading="lazy">
+                    <div class="gallery-overlay">
+                        <i data-lucide="zoom-in" style="color: white; width: 30px; height: 30px;"></i>
+                    </div>
+                `;
+                galleryGrid.appendChild(item);
+            });
+            observeElements();
+            lucide.createIcons();
         }
 
         // --- RENDER PROFILES ---
@@ -1094,7 +1161,6 @@
 
         function renderMessages() {
             messagesGrid.innerHTML = '';
-            // Ambil 6 pesan terbaru
             const recentMessages = allProfiles
                 .filter(p => p.message && p.message.trim().length > 0)
                 .slice(-6)
@@ -1104,12 +1170,11 @@
                 const msgCard = document.createElement('div');
                 msgCard.className = 'log-entry fade-up';
                 
-                // Format date simplistic
                 let dateStr = "Unknown Date";
                 if(profile.timestamp) {
                     const d = new Date(profile.timestamp);
                     if(!isNaN(d)) dateStr = d.toLocaleDateString('id-ID');
-                    else dateStr = profile.timestamp.split(' ')[0]; // Fallback simple split
+                    else dateStr = profile.timestamp.split(' ')[0];
                 }
 
                 msgCard.innerHTML = `
@@ -1141,7 +1206,6 @@
             const igBtn = document.getElementById('modalIg');
             if (profile.instagram && profile.instagram !== '#' && profile.instagram !== '-') {
                 igBtn.style.display = 'inline-flex';
-                // Simple logic to handle if user typed "@username" or full url
                 let igLink = profile.instagram;
                 if (!igLink.startsWith('http')) {
                     igLink = 'https://instagram.com/' + igLink.replace('@', '');
@@ -1167,29 +1231,6 @@
             }
         }
 
-        // --- RENDER GALLERY (STATIC FOR NOW) ---
-        const galleryGrid = document.getElementById('galleryGrid');
-        const galleryImages = [
-            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
-            'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
-            'https://images.unsplash.com/photo-1520939817895-060bdaf4ade1',
-            'https://images.unsplash.com/photo-1559136555-930d72f1d300',
-            'https://images.unsplash.com/photo-1524504388940-b1c1722653e1',
-            'https://images.unsplash.com/photo-1516820208784-270b250306e3'
-        ];
-
-        galleryImages.forEach((src, index) => {
-            const item = document.createElement('div');
-            item.className = 'gallery-item fade-up';
-            item.innerHTML = `
-                <img src="${src}?w=400&q=80" alt="Gallery ${index}">
-                <div class="gallery-overlay">
-                    <i data-lucide="search" style="color: white; width: 30px; height: 30px;"></i>
-                </div>
-            `;
-            galleryGrid.appendChild(item);
-        });
-
         // --- ANIMATION ON SCROLL ---
         function observeElements() {
             const observer = new IntersectionObserver((entries) => {
@@ -1211,8 +1252,8 @@
         });
 
         // --- INIT ---
-        // Jalankan fetch saat halaman dimuat
-        fetchSheetData();
+        fetchBiodata();
+        fetchGallery();
 
     </script>
 </body>
