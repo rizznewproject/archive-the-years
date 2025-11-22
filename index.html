@@ -14,6 +14,8 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- CSV Parser Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- Markdown Parser for AI Response -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
         /* --- VARIABLES & RESET --- */
@@ -105,6 +107,22 @@
             background: var(--gold-light);
             color: var(--navy);
         }
+        
+        /* AI Button Style */
+        .btn-ai {
+            background: linear-gradient(135deg, var(--deep-blue), var(--navy));
+            border: 1px solid var(--gold);
+            color: var(--gold-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+        
+        .btn-ai:hover {
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
+            text-shadow: 0 0 5px var(--gold);
+        }
 
         .btn-sm {
             padding: 8px 16px;
@@ -126,6 +144,12 @@
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
         }
 
         /* --- NAVIGATION --- */
@@ -208,13 +232,15 @@
 
         /* --- HERO SECTION --- */
         .hero {
-            height: 100vh;
+            min-height: 100vh;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             overflow: hidden;
+            padding-top: 120px; 
+            padding-bottom: 80px;
         }
 
         .hero-bg {
@@ -223,8 +249,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://images.unsplash.com/photo-1468581264429-2548ef9eb732?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
-            filter: brightness(0.4) saturate(0.8);
+            background: url('https://lh3.googleusercontent.com/d/12-MFExk3rKMa6yY_C8nryRgGDsWuH9SR') no-repeat center center/cover;
+            filter: brightness(0.9) saturate(1.0);
             z-index: -2;
         }
 
@@ -234,7 +260,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(10,26,47,0.4) 0%, rgba(10,26,47,0.9) 100%);
+            background: radial-gradient(circle at center, rgba(10,26,47,0.1) 0%, rgba(10,26,47,0.5) 100%);
             z-index: -1;
         }
 
@@ -265,8 +291,13 @@
         }
 
         .hero-content {
+            position: relative;
+            z-index: 10;
             max-width: 800px;
             padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .hero-subtitle {
@@ -275,27 +306,32 @@
             margin-bottom: 20px;
             letter-spacing: 3px;
             display: block;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* Added shadow for readability */
         }
 
         .hero h2 {
             font-size: 4rem;
             margin-bottom: 20px;
             line-height: 1.1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8); /* Added shadow */
         }
 
         .hero p {
             font-size: 1.2rem;
-            color: var(--slate);
+            color: var(--white); /* Pastikan putih */
             margin-bottom: 40px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); /* Shadow kuat untuk readability */
+            font-weight: 500;
         }
 
         .hero-btns {
             display: flex;
             gap: 20px;
             justify-content: center;
+            margin-bottom: 40px;
         }
 
         /* --- JOURNEY (TIMELINE) --- */
@@ -334,7 +370,6 @@
         .timeline-item.left { left: 0; text-align: right; }
         .timeline-item.right { left: 50%; text-align: left; }
 
-        /* The Dots */
         .timeline-item::after {
             content: '⚓';
             position: absolute;
@@ -545,13 +580,26 @@
             color: #666;
         }
 
-        .log-form input, .log-form textarea {
+        /* AI Input Area Enhancements */
+        .ai-input-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .ai-input-group textarea {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: rgba(255,255,255,0.5);
-            border: 1px solid #ccc;
-            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            border: 2px solid var(--navy);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.8);
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .ai-input-group textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
         /* --- UPLOAD & CONTACT --- */
@@ -568,41 +616,6 @@
             max-width: 600px;
             margin: 0 auto;
         }
-
-        .form-group { margin-bottom: 20px; }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--gold);
-            font-size: 0.9rem;
-        }
-
-        input[type="text"], input[type="email"], textarea, select {
-            width: 100%;
-            padding: 12px;
-            background: var(--navy);
-            border: 1px solid #233554;
-            color: var(--white);
-            border-radius: 4px;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-
-        .file-drop {
-            border: 2px dashed var(--gold);
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            background: rgba(212, 175, 55, 0.05);
-            transition: var(--transition);
-        }
-
-        .file-drop:hover { background: rgba(212, 175, 55, 0.1); }
 
         /* --- FOOTER --- */
         footer {
@@ -714,6 +727,32 @@
             color: var(--white);
             margin-top: 20px;
         }
+        
+        /* AI Prediction Box */
+        .ai-prediction-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(45deg, rgba(212, 175, 55, 0.1), rgba(10, 26, 47, 0.3));
+            border: 1px dashed var(--gold);
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+        }
+        
+        .ai-prediction-box h5 {
+            color: var(--gold);
+            font-family: 'Playfair Display';
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .ai-content {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--white);
+            line-height: 1.5;
+        }
 
         /* --- MEDIA QUERIES --- */
         @media screen and (max-width: 768px) {
@@ -766,6 +805,21 @@
             <div class="hero-btns">
                 <a href="#profiles" class="btn btn-primary">Explore Profiles</a>
                 <a href="#gallery" class="btn">Open Gallery</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION BARU: BANNER ABSENSI -->
+    <section id="attendance" style="background: var(--gold); padding: 30px 0; border-bottom: 5px solid var(--deep-blue); position: relative; z-index: 20;">
+        <div class="container fade-up">
+            <div style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px;">
+                <h3 style="color: var(--navy); font-family: 'Space Mono', monospace; font-size: 1.1rem; margin: 0; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">
+                    <i data-lucide="bell-ring" style="vertical-align: text-bottom; margin-right: 8px;"></i>
+                    TIBA-TIBA HARUS ABSEN? JANGAN LUPA, AKSES LINKNYA DI SINI!
+                </h3>
+                <a href="https://cahaji229-glitch.github.io/absensifoxtrot/" target="_blank" class="btn" style="background: var(--navy); color: var(--gold); border: 1px solid var(--navy); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
+                    <i data-lucide="clipboard-check" width="18"></i> ISI ABSENSI SEKARANG
+                </a>
             </div>
         </div>
     </section>
@@ -871,7 +925,7 @@
         </div>
     </section>
 
-    <!-- Message Wall (Using data from Sheets) -->
+    <!-- Message Wall with AI Writer -->
     <section id="messages" class="section-padding" style="background-color: #F4F1EB;">
         <div class="container">
             <div class="journey-header fade-up">
@@ -880,11 +934,24 @@
             </div>
 
             <div class="logbook-container fade-up">
-                <!-- Form Link -->
+                <!-- Write Message Form -->
                 <div class="log-entry" style="background: #fff; margin-bottom: 30px; border-left: 5px solid var(--navy);">
-                    <h3 style="color: var(--navy); font-family: 'Space Mono'; font-size: 1.2rem; margin-bottom: 15px;">TULIS PESAN DI LOGBOOK</h3>
-                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">Pesan yang Anda tulis di formulir biodata akan otomatis muncul di sini setelah disetujui.</p>
-                    <a href="#upload" class="btn btn-primary" style="width: 100%; text-align:center; text-decoration:none;">Isi Formulir Biodata</a>
+                    <h3 style="color: var(--navy); font-family: 'Space Mono'; font-size: 1.2rem; margin-bottom: 15px;">TULIS PESAN DENGAN AI</h3>
+                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">Bingung merangkai kata? Tulis poin singkatnya, biarkan AI menyusunnya menjadi puisi pelaut.</p>
+                    
+                    <div class="ai-input-group">
+                        <textarea id="logInput" rows="3" placeholder="Contoh: Sedih banget bakal pisah sama kalian semua, sukses ya!"></textarea>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button onclick="generateLogMessage()" class="btn btn-ai" style="flex:1;">
+                            <i data-lucide="sparkles" width="16"></i> ✨ Perindah dengan AI
+                        </button>
+                        <a href="#upload" class="btn btn-primary" style="flex:1; text-align:center; text-decoration:none;">
+                            Kirim ke Logbook
+                        </a>
+                    </div>
+                    <div id="logOutput" class="quote-box" style="display:none; margin-top:15px; font-family:'Space Mono'; font-size:0.85rem;"></div>
                 </div>
 
                 <!-- Messages Grid -->
@@ -946,7 +1013,7 @@
         </div>
     </footer>
 
-    <!-- Profile Modal -->
+    <!-- Profile Modal with AI Prediction -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -987,6 +1054,20 @@
                         <div class="quote-box">
                             <p id="modalMessage">Foxtrot 59 adalah rumah kedua bagi saya.</p>
                         </div>
+                        
+                        <!-- AI Feature: Future Compass -->
+                        <div style="margin-top:25px;">
+                            <button id="predictBtn" onclick="predictFuture()" class="btn btn-ai" style="width:100%; justify-content:center;">
+                                <i data-lucide="compass" width="18"></i> ✨ Kompas Masa Depan (AI)
+                            </button>
+                            
+                            <div id="aiPrediction" class="ai-prediction-box">
+                                <h5><i data-lucide="sparkles" width="16"></i> Ramalan Kapten AI</h5>
+                                <div id="aiPredictionContent" class="ai-content">
+                                    <!-- Content filled by JS -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div style="margin-top: 30px;">
@@ -1002,16 +1083,95 @@
         // Initialize Icons
         lucide.createIcons();
 
-        // --- CONFIGURATION ---
-        
-        // 1. CSV BIODATA (Updated)
-        const BIODATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUFeP2e54_CWmXMU06wrfSzUy93ZGMybdGfZsGAUwgD8tEdC1Io6UvkaczNKuUuftkuzN_VMNYKq2O/pub?output=csv';
+        // --- GEMINI API CONFIGURATION ---
+        const apiKey = ""; // System automatically provides this
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
-        // 2. CSV GALLERY (Updated & Fixed to CSV format)
-        // User provided: .../d/p -> we convert to .../pub?output=csv
+        // --- DATA STORAGE ---
+        // 1. CSV BIODATA
+        const BIODATA_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUFeP2e54_CWmXMU06wrfSzUy93ZGMybdGfZsGAUwgD8tEdC1Io6UvkaczNKuUuftkuzN_VMNYKq2O/pub?output=csv';
+        // 2. CSV GALLERY
         const GALLERY_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQROLPYW3zigNZqc7o3qd9vBrSPW4PlXUSwRSZKW28iEeFQztQ9AskZlmC1nMn2Wl8e_ac4HOnb6L-d/pub?output=csv';
 
         let allProfiles = [];
+        let currentProfile = null; // Store currently viewed profile for AI
+
+        // --- HELPER: CALL GEMINI API ---
+        async function callGemini(prompt) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                return "Maaf, Kapten AI sedang sibuk menghadapi badai. Coba lagi nanti.";
+            }
+        }
+
+        // --- FEATURE 1: PREDICT FUTURE (PROFILE) ---
+        async function predictFuture() {
+            if (!currentProfile) return;
+            
+            const btn = document.getElementById('predictBtn');
+            const box = document.getElementById('aiPrediction');
+            const content = document.getElementById('aiPredictionContent');
+            
+            // UI Loading State
+            btn.innerHTML = '<i data-lucide="loader" class="animate-spin"></i> Membaca Bintang...';
+            btn.disabled = true;
+            box.style.display = 'block';
+            content.innerHTML = '<em>Sedang menghubungi konstelasi Gemini...</em>';
+            
+            const prompt = `
+                Berperanlah sebagai Kapten Kapal Tua yang bijak dan humoris.
+                Buatkan "Ramalan Masa Depan" singkat (maksimal 3 kalimat) untuk kadet ini:
+                Nama: ${currentProfile.name}
+                Hobi: ${currentProfile.hobby}
+                Keahlian: ${currentProfile.skill}
+                Motto: ${currentProfile.motto}
+                
+                Prediksi pekerjaan masa depan mereka yang berhubungan dengan laut/perikanan tapi twist-nya lucu atau epik.
+                Gunakan bahasa Indonesia yang puitis ala pelaut.
+            `;
+            
+            const result = await callGemini(prompt);
+            
+            content.innerHTML = marked.parse(result);
+            btn.innerHTML = '<i data-lucide="compass"></i> ✨ Ramal Lagi';
+            btn.disabled = false;
+            lucide.createIcons();
+        }
+
+        // --- FEATURE 2: LOGBOOK WRITER (MESSAGES) ---
+        async function generateLogMessage() {
+            const input = document.getElementById('logInput').value;
+            if (!input) return alert("Tulis dulu poin pesannya, Kapten!");
+            
+            const outputBox = document.getElementById('logOutput');
+            
+            outputBox.style.display = 'block';
+            outputBox.innerHTML = '<em>AI sedang merangkai kata... <i data-lucide="loader" class="animate-spin"></i></em>';
+            lucide.createIcons();
+            
+            const prompt = `
+                Ubah pesan kasar ini menjadi "Catatan Logbook Pelaut" yang puitis, epik, dan mengharukan.
+                Pesan asli: "${input}"
+                Gunakan metafora laut (ombak, dermaga, badai, bintang).
+                Bahasa Indonesia. Maksimal 2 kalimat panjang.
+            `;
+            
+            const result = await callGemini(prompt);
+            outputBox.innerHTML = `<strong>Saran AI:</strong><br>"${result}"`;
+        }
 
         // --- HELPER: GOOGLE DRIVE LINK CONVERTER ---
         function getDriveImage(url) {
@@ -1042,7 +1202,6 @@
 
         function processBiodata(data) {
             allProfiles = data.filter(row => {
-                // Filter Status Approved
                 return row['Status'] && row['Status'].trim().toLowerCase() === 'approved';
             }).map((row, index) => {
                 let imgUrl = getDriveImage(row['Upload Foto Profil'] || '');
@@ -1087,10 +1246,7 @@
             const galleryGrid = document.getElementById('galleryGrid');
             galleryGrid.innerHTML = '';
 
-            // Ambil data yang valid (ada foto)
             const validImages = data.filter(row => {
-                // Cek kolom yang mungkin berisi foto. Karena formnya simple, biasanya kolom ke-2 atau yang bernama "Upload"
-                // Kita cari value yang ada link drivenya
                 return Object.values(row).some(val => val && val.includes('drive.google.com'));
             });
 
@@ -1100,7 +1256,6 @@
             }
 
             validImages.forEach((row, index) => {
-                // Cari kolom gambar secara dinamis
                 const imgLink = Object.values(row).find(val => val && val.includes('drive.google.com'));
                 const finalImg = getDriveImage(imgLink);
 
@@ -1149,7 +1304,6 @@
             observeElements();
         }
 
-        // Filter Logic
         function filterProfiles(campus) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -1193,6 +1347,8 @@
         const closeBtn = document.getElementsByClassName("close-modal")[0];
 
         function openModal(profile) {
+            currentProfile = profile; // Save for AI usage
+            
             document.getElementById('modalImg').src = profile.img;
             document.getElementById('modalName').innerText = profile.name;
             document.getElementById('modalNick').innerText = `"${profile.nickname}"`;
@@ -1203,6 +1359,12 @@
             document.getElementById('modalMotto').innerText = `"${profile.motto}"`;
             document.getElementById('modalMessage').innerText = profile.message;
             
+            // Reset AI Box
+            document.getElementById('aiPrediction').style.display = 'none';
+            document.getElementById('aiPredictionContent').innerHTML = '';
+            document.getElementById('predictBtn').innerHTML = '<i data-lucide="compass" width="18"></i> ✨ Kompas Masa Depan (AI)';
+            document.getElementById('predictBtn').disabled = false;
+
             const igBtn = document.getElementById('modalIg');
             if (profile.instagram && profile.instagram !== '#' && profile.instagram !== '-') {
                 igBtn.style.display = 'inline-flex';
@@ -1217,6 +1379,7 @@
             
             modal.style.display = "block";
             document.body.style.overflow = "hidden";
+            lucide.createIcons();
         }
 
         closeBtn.onclick = function() {
