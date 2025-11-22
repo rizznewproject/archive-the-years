@@ -306,7 +306,17 @@
             margin-bottom: 20px;
             letter-spacing: 3px;
             display: block;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            /* UPDATE: Bayangan hitam dipertebal agar tulisan lebih jelas ("pop-up") */
+            text-shadow: 
+                3px 3px 0px #000000, 
+                -1px -1px 0 #000000,  
+                1px -1px 0 #000000,
+                -1px 1px 0 #000000,
+                1px 1px 0 #000000;
+            font-weight: 700; /* Menebalkan font sedikit */
+            background-color: rgba(0, 0, 0, 0.3); /* Menambahkan latar belakang transparan tipis opsional untuk keterbacaan maksimal */
+            padding: 5px 15px;
+            border-radius: 4px;
         }
 
         .hero h2 {
@@ -1001,12 +1011,14 @@
             <div class="footer-logo">ATY Foxtrot 59</div>
             
             <div class="social-links">
-                <a href="#"><i data-lucide="instagram"></i></a>
-                <a href="#"><i data-lucide="message-circle"></i></a> <!-- WhatsApp placeholder -->
-                <a href="#"><i data-lucide="mail"></i></a>
+                <!-- Hanya logo Instagram yang dipertahankan dan diperbarui -->
+                <a href="https://www.instagram.com/59.foxtrot?igsh=cWpsNW9oN2RiNTY4" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--slate); transition: color 0.3s;">
+                    <i data-lucide="instagram" style="color: var(--gold);"></i>
+                    <span style="font-family: 'Space Mono', monospace; font-size: 0.9rem;">Mari intip perjalanan kami dengan mengklik icon ig untuk menuju ig kelas kami</span>
+                </a>
             </div>
 
-            <p style="font-family: 'Space Mono'; font-size: 0.8rem; color: var(--slate);">
+            <p style="font-family: 'Space Mono'; font-size: 0.8rem; color: var(--slate); margin-top: 20px;">
                 &copy; 2025 Archive The Years Project.<br>Teknologi Penangkapan Ikan Angkatan 59.
             </p>
             
