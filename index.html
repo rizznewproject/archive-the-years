@@ -10,8 +10,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
     
-    <!-- Icons (Lucide Icons via CDN for performance) -->
+    <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CSV Parser Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
     <style>
         /* --- VARIABLES & RESET --- */
@@ -43,7 +45,7 @@
             line-height: 1.6;
             overflow-x: hidden;
             background-image: radial-gradient(var(--deep-blue) 1px, transparent 1px);
-            background-size: 40px 40px; /* Pattern peta laut subtle */
+            background-size: 40px 40px;
         }
 
         h1, h2, h3, h4 {
@@ -150,7 +152,7 @@
         }
 
         .logo h1 {
-            font-size: 1.2rem; /* Font size tetap kecil sesuai request sebelumnya */
+            font-size: 1.2rem;
             letter-spacing: 1px;
             margin-bottom: 4px;
         }
@@ -216,7 +218,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* Kembali ke gambar Unsplash Nautical */
             background: url('https://images.unsplash.com/photo-1468581264429-2548ef9eb732?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
             filter: brightness(0.4) saturate(0.8);
             z-index: -2;
@@ -833,6 +834,9 @@
 
             <div class="profiles-grid" id="profilesGrid">
                 <!-- Grid items will be injected via JS -->
+                <div style="color:white; text-align:center; grid-column: 1/-1;">
+                    <i data-lucide="loader" class="animate-spin"></i> Memuat data pelaut dari arsip...
+                </div>
             </div>
         </div>
     </section>
@@ -851,48 +855,25 @@
         </div>
     </section>
 
-    <!-- Message Wall -->
+    <!-- Message Wall (Using data from Sheets) -->
     <section id="messages" class="section-padding" style="background-color: #F4F1EB;">
         <div class="container">
             <div class="journey-header fade-up">
                 <h2 style="color: var(--navy);">Captain's Logbook</h2>
-                <p style="color: #666; margin-top: 10px;">Kata-kata kecil yang menyimpan cerita besar.</p>
+                <p style="color: #666; margin-top: 10px;">Pesan untuk kelas dari para awak.</p>
             </div>
 
             <div class="logbook-container fade-up">
-                <!-- Form -->
+                <!-- Form Link -->
                 <div class="log-entry" style="background: #fff; margin-bottom: 30px; border-left: 5px solid var(--navy);">
-                    <h3 style="color: var(--navy); font-family: 'Space Mono'; font-size: 1.2rem; margin-bottom: 15px;">TULIS PESAN BARU</h3>
-                    <form class="log-form">
-                        <input type="text" placeholder="Nama / Callsign">
-                        <textarea rows="3" placeholder="Pesan untuk awak kapal Foxtrot..."></textarea>
-                        <button type="button" class="btn btn-primary" style="width: 100%;">CATAT DI LOGBOOK</button>
-                    </form>
+                    <h3 style="color: var(--navy); font-family: 'Space Mono'; font-size: 1.2rem; margin-bottom: 15px;">TULIS PESAN DI LOGBOOK</h3>
+                    <p style="margin-bottom:15px; color:#666; font-size:0.9rem;">Pesan yang Anda tulis di formulir pendaftaran akan otomatis muncul di sini setelah disetujui.</p>
+                    <a href="#upload" class="btn btn-primary" style="width: 100%; text-align:center; text-decoration:none;">Isi Formulir</a>
                 </div>
 
                 <!-- Messages Grid -->
-                <div class="logbook-grid">
-                    <div class="log-entry">
-                        <div class="log-header">
-                            <span>DARI: ANDI (TEGAL)</span>
-                            <span>DATE: 21/11/2025</span>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--navy);">"Semoga sukses teman-teman semua. Jangan lupa hari ini kita ada kuis Pak Budi!"</p>
-                    </div>
-                    <div class="log-entry">
-                        <div class="log-header">
-                            <span>DARI: SITI (LAMPUNG)</span>
-                            <span>DATE: 20/11/2025</span>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--navy);">"Perjalanan masih panjang, tetap jaga kesehatan kawan. Korsa!"</p>
-                    </div>
-                     <div class="log-entry">
-                        <div class="log-header">
-                            <span>DARI: RIZKY (ACEH)</span>
-                            <span>DATE: 19/11/2025</span>
-                        </div>
-                        <p style="font-size: 0.9rem; color: var(--navy);">"Rindu masakan rumah, tapi makan bareng kalian di kantin juga asik."</p>
-                    </div>
+                <div class="logbook-grid" id="messagesGrid">
+                    <!-- Messages injected via JS -->
                 </div>
             </div>
         </div>
@@ -907,47 +888,24 @@
             </div>
 
             <div class="upload-card fade-up">
-                <form>
-                    <div class="form-group">
-                        <label>Unggah Foto Profil & Kenangan (Max 10MB)</label>
-                        <div class="file-drop">
-                            <i data-lucide="upload-cloud" style="width: 40px; height: 40px; color: var(--gold);"></i>
-                            <p style="font-size: 0.9rem; margin-top: 10px; color: var(--slate);">Drag files here or click to upload</p>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Lengkap</label>
-                        <input type="text" placeholder="Nama sesuai KTM">
-                    </div>
-                    <div class="form-group">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div>
-                                <label>Nama Panggilan</label>
-                                <input type="text" placeholder="Nickname">
-                            </div>
-                            <div>
-                                <label>Asal Kampus</label>
-                                <select>
-                                    <option>Jakarta</option>
-                                    <option>Aceh</option>
-                                    <option>Pariaman</option>
-                                    <option>Lampung</option>
-                                    <option>Tegal</option>
-                                    <option>Maluku</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Motto Hidup</label>
-                        <input type="text" placeholder="Kata-kata mutiara...">
-                    </div>
-                    <div class="form-group">
-                        <label>Pesan Untuk Kelas</label>
-                        <textarea rows="4" placeholder="Tulis pesanmu..."></textarea>
-                    </div>
-                    <button type="button" class="btn btn-primary" style="width: 100%;">Kirim Data ke Arsip</button>
-                </form>
+                <div style="text-align:center; padding: 20px;">
+                    <i data-lucide="file-text" style="width: 60px; height: 60px; color: var(--gold); margin-bottom:20px;"></i>
+                    <h3 style="color:white; margin-bottom:10px;">Formulir Data Foxtrot 59</h3>
+                    <p style="color: var(--slate); margin-bottom:30px;">
+                        Silakan isi biodata lengkap dan upload foto Anda melalui Google Form resmi kelas. 
+                        Data Anda akan ditinjau admin sebelum ditampilkan di website.
+                    </p>
+                    
+                    <!-- PLACEHOLDER LINK FORM -->
+                    <!-- User Instruction: Ganti href dibawah ini dengan Link Google Form Anda -->
+                    <a href="https://forms.gle/b7scEJZQviD3UvGC9" target="_blank" class="btn btn-primary" style="font-size:1.1rem; padding:15px 40px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
+                        <i data-lucide="external-link" width="18"></i> BUKA GOOGLE FORM
+                    </a>
+                    
+                    <p style="margin-top:20px; font-size:0.8rem; color: var(--slate); opacity:0.7;">
+                        Pastikan Anda login akun Google untuk mengupload foto.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
@@ -1017,7 +975,7 @@
                     </div>
                     
                     <div style="margin-top: 30px;">
-                        <a href="#" class="btn"><i data-lucide="instagram" style="width: 16px; vertical-align: middle; margin-right: 5px;"></i> Follow Instagram</a>
+                        <a id="modalIg" href="#" target="_blank" class="btn"><i data-lucide="instagram" style="width: 16px; vertical-align: middle; margin-right: 5px;"></i> Follow Instagram</a>
                     </div>
                 </div>
             </div>
@@ -1029,39 +987,81 @@
         // Initialize Icons
         lucide.createIcons();
 
-        // --- 1. GENERATE DUMMY DATA (40 Profiles) ---
-        const campuses = ['Jakarta', 'Aceh', 'Pariaman', 'Lampung', 'Tegal', 'Maluku'];
-        const names = [
-            "Aditya Pratama", "Budi Santoso", "Citra Dewi", "Dimas Anggara", "Eka Saputra",
-            "Fajar Nugraha", "Gita Pertiwi", "Hadi Kusuma", "Indah Sari", "Joko Susilo",
-            "Kartika Wulandari", "Lukman Hakim", "Maya Agustina", "Nanda Putra", "Olivia Putri",
-            "Panji Gumilang", "Qori'ah Nur", "Rizky Maulana", "Siti Aminah", "Tegar Wicaksono",
-            "Utami Ningsih", "Vicky Prasetyo", "Winda Lestari", "Xaverius T.", "Yusuf Hidayat",
-            "Zahra Amelia", "Agus Setiawan", "Bayu Samudra", "Cahyono", "Dinda Kirana",
-            "Eko Prasetyo", "Fitri Handayani", "Gilang Ramadhan", "Hesti Puspita", "Irfan Bachdim",
-            "Jihan Fahira", "Kevin Julio", "Larasati", "Miko Alfarizi", "Nurul Hidayah"
-        ];
+        // --- CONFIGURATION ---
+        // Link CSV Google Sheets yang Anda berikan
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSUFeP2e54_CWmXMU06wrfSzUy93ZGMybdGfZsGAUwgD8tEdC1Io6UvkaczNKuUuftkuzN_VMNYKq2O/pub?gid=500349042&single=true&output=csv';
 
-        const profiles = names.map((name, index) => {
-            const campus = campuses[Math.floor(Math.random() * campuses.length)];
-            return {
-                id: index,
-                name: name,
-                nickname: name.split(" ")[0],
-                campus: campus,
-                origin: `Kota di ${campus}`,
-                motto: "Laut adalah masa depan bangsa.",
-                message: "Bangga menjadi bagian dari Foxtrot 59. Semoga kita semua sukses!",
-                img: `https://i.pravatar.cc/400?img=${index + 1}` // Placeholder avatar
-            };
-        });
+        let allProfiles = [];
 
-        // --- 2. RENDER PROFILES ---
+        // --- FETCH DATA FROM GOOGLE SHEETS ---
+        function fetchSheetData() {
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: true, // Assumes first row is header
+                complete: function(results) {
+                    processSheetData(results.data);
+                },
+                error: function(err) {
+                    console.error("Error fetching Sheet:", err);
+                    document.getElementById('profilesGrid').innerHTML = '<p style="color:white;">Gagal memuat data. Coba refresh halaman.</p>';
+                }
+            });
+        }
+
+        function processSheetData(data) {
+            // Mapping data dari CSV ke format object aplikasi
+            // Kita mencari kolom yang sesuai dengan nama di Google Form
+            // Jika nama kolom di form berbeda, sesuaikan 'key' di sini.
+            
+            allProfiles = data.filter(row => {
+                // FILTER: Hanya ambil yang statusnya "Approved" (Case insensitive)
+                return row['Status'] && row['Status'].trim().toLowerCase() === 'approved';
+            }).map((row, index) => {
+                
+                // Helper to fix Google Drive Image Links
+                let imgUrl = row['Upload Foto Profil'] || '';
+                if (imgUrl.includes('drive.google.com')) {
+                    // Convert 'open?id=' or 'file/d/' to direct link 'uc?export=view&id='
+                    // Better yet: lh3.googleusercontent.com for speed if possible, but uc export is standard fallback
+                    const idMatch = imgUrl.match(/id=([a-zA-Z0-9_-]+)/) || imgUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                    if (idMatch) {
+                        imgUrl = `https://lh3.googleusercontent.com/d/${idMatch[1]}`; 
+                    }
+                }
+                // Fallback placeholder
+                if (!imgUrl) imgUrl = `https://i.pravatar.cc/400?img=${index + 1}`;
+
+                return {
+                    id: index,
+                    name: row['Nama Lengkap'] || 'Tanpa Nama',
+                    nickname: row['Nama Panggilan'] || '-',
+                    campus: row['Asal Kampus'] || 'Jakarta',
+                    origin: row['Asal Daerah'] || '-',
+                    skill: row['Keahlian/Skill'] || '-',
+                    hobby: row['Hobby'] || '-',
+                    motto: row['Motto Hidup'] || '-',
+                    message: row['Pesan untuk Kelas'] || '',
+                    instagram: row['Instagram'] || '#',
+                    img: imgUrl,
+                    timestamp: row['Timestamp'] // Google form usually adds this
+                };
+            });
+
+            renderProfiles('all');
+            renderMessages();
+        }
+
+        // --- RENDER PROFILES ---
         const profilesGrid = document.getElementById('profilesGrid');
 
         function renderProfiles(filter = 'all') {
             profilesGrid.innerHTML = '';
-            const filtered = filter === 'all' ? profiles : profiles.filter(p => p.campus === filter);
+            const filtered = filter === 'all' ? allProfiles : allProfiles.filter(p => p.campus === filter);
+
+            if (filtered.length === 0) {
+                profilesGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--slate);">Belum ada data untuk kategori ini.</div>';
+                return;
+            }
 
             filtered.forEach(profile => {
                 const card = document.createElement('div');
@@ -1069,7 +1069,7 @@
                 card.onclick = () => openModal(profile);
                 card.innerHTML = `
                     <div class="card-img-wrapper">
-                        <img src="${profile.img}" alt="${profile.name}" loading="lazy">
+                        <img src="${profile.img}" alt="${profile.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'">
                     </div>
                     <div class="card-content">
                         <h3>${profile.name}</h3>
@@ -1079,20 +1079,95 @@
                 profilesGrid.appendChild(card);
             });
             lucide.createIcons();
-            observeElements(); // Re-observe new elements
+            observeElements();
         }
-
-        renderProfiles(); // Initial Load
 
         // Filter Logic
         function filterProfiles(campus) {
-            // Update buttons
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             renderProfiles(campus);
         }
 
-        // --- 3. RENDER GALLERY ---
+        // --- RENDER MESSAGES ---
+        const messagesGrid = document.getElementById('messagesGrid');
+
+        function renderMessages() {
+            messagesGrid.innerHTML = '';
+            // Ambil 6 pesan terbaru
+            const recentMessages = allProfiles
+                .filter(p => p.message && p.message.trim().length > 0)
+                .slice(-6)
+                .reverse();
+
+            recentMessages.forEach(profile => {
+                const msgCard = document.createElement('div');
+                msgCard.className = 'log-entry fade-up';
+                
+                // Format date simplistic
+                let dateStr = "Unknown Date";
+                if(profile.timestamp) {
+                    const d = new Date(profile.timestamp);
+                    if(!isNaN(d)) dateStr = d.toLocaleDateString('id-ID');
+                    else dateStr = profile.timestamp.split(' ')[0]; // Fallback simple split
+                }
+
+                msgCard.innerHTML = `
+                    <div class="log-header">
+                        <span>DARI: ${profile.nickname.toUpperCase()} (${profile.campus.toUpperCase()})</span>
+                        <span>${dateStr}</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--navy);">"${profile.message}"</p>
+                `;
+                messagesGrid.appendChild(msgCard);
+            });
+        }
+
+        // --- MODAL LOGIC ---
+        const modal = document.getElementById("profileModal");
+        const closeBtn = document.getElementsByClassName("close-modal")[0];
+
+        function openModal(profile) {
+            document.getElementById('modalImg').src = profile.img;
+            document.getElementById('modalName').innerText = profile.name;
+            document.getElementById('modalNick').innerText = `"${profile.nickname}"`;
+            document.getElementById('modalCampus').innerText = profile.campus;
+            document.getElementById('modalOrigin').innerText = profile.origin;
+            document.getElementById('modalSkill').innerText = profile.skill;
+            document.getElementById('modalHobby').innerText = profile.hobby;
+            document.getElementById('modalMotto').innerText = `"${profile.motto}"`;
+            document.getElementById('modalMessage').innerText = profile.message;
+            
+            const igBtn = document.getElementById('modalIg');
+            if (profile.instagram && profile.instagram !== '#' && profile.instagram !== '-') {
+                igBtn.style.display = 'inline-flex';
+                // Simple logic to handle if user typed "@username" or full url
+                let igLink = profile.instagram;
+                if (!igLink.startsWith('http')) {
+                    igLink = 'https://instagram.com/' + igLink.replace('@', '');
+                }
+                igBtn.href = igLink;
+            } else {
+                igBtn.style.display = 'none';
+            }
+            
+            modal.style.display = "block";
+            document.body.style.overflow = "hidden";
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        }
+
+        // --- RENDER GALLERY (STATIC FOR NOW) ---
         const galleryGrid = document.getElementById('galleryGrid');
         const galleryImages = [
             'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
@@ -1115,36 +1190,7 @@
             galleryGrid.appendChild(item);
         });
 
-        // --- 4. MODAL LOGIC ---
-        const modal = document.getElementById("profileModal");
-        const closeBtn = document.getElementsByClassName("close-modal")[0];
-
-        function openModal(profile) {
-            document.getElementById('modalImg').src = profile.img;
-            document.getElementById('modalName').innerText = profile.name;
-            document.getElementById('modalNick').innerText = `"${profile.nickname}"`;
-            document.getElementById('modalCampus').innerText = profile.campus;
-            document.getElementById('modalOrigin').innerText = profile.origin;
-            document.getElementById('modalMotto').innerText = `"${profile.motto}"`;
-            document.getElementById('modalMessage').innerText = profile.message;
-            
-            modal.style.display = "block";
-            document.body.style.overflow = "hidden"; // Prevent scrolling background
-        }
-
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-            document.body.style.overflow = "auto";
-        }
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                document.body.style.overflow = "auto";
-            }
-        }
-
-        // --- 5. ANIMATION ON SCROLL (AOS-like) ---
+        // --- ANIMATION ON SCROLL ---
         function observeElements() {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -1159,10 +1205,14 @@
         
         observeElements();
 
-        // --- 6. MOBILE MENU ---
+        // --- MOBILE MENU ---
         document.querySelector('.mobile-toggle').addEventListener('click', () => {
             document.querySelector('.nav-links').classList.toggle('active');
         });
+
+        // --- INIT ---
+        // Jalankan fetch saat halaman dimuat
+        fetchSheetData();
 
     </script>
 </body>
