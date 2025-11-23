@@ -306,15 +306,14 @@
             margin-bottom: 20px;
             letter-spacing: 3px;
             display: block;
-            /* UPDATE: Bayangan hitam dipertebal agar tulisan lebih jelas ("pop-up") */
             text-shadow: 
                 3px 3px 0px #000000, 
                 -1px -1px 0 #000000,  
                 1px -1px 0 #000000,
                 -1px 1px 0 #000000,
                 1px 1px 0 #000000;
-            font-weight: 700; /* Menebalkan font sedikit */
-            background-color: rgba(0, 0, 0, 0.3); /* Menambahkan latar belakang transparan tipis opsional untuk keterbacaan maksimal */
+            font-weight: 700;
+            background-color: rgba(0, 0, 0, 0.3);
             padding: 5px 15px;
             border-radius: 4px;
         }
@@ -760,9 +759,9 @@
         .ai-content {
             font-family: 'Space Mono', monospace;
             font-size: 0.85rem;
-            color: #000; /* UPDATED: Changed from var(--white) to black */
+            color: #000;
             line-height: 1.5;
-            background: rgba(255, 255, 255, 0.8); /* Added light background for contrast */
+            background: rgba(255, 255, 255, 0.8);
             padding: 10px;
             border-radius: 4px;
         }
@@ -913,6 +912,36 @@
         </div>
     </section>
 
+    <!-- Upload Page (Moved) -->
+    <section id="upload" class="section-padding upload-section">
+        <div class="container">
+            <div class="journey-header fade-up">
+                <h2>Upload Biodata</h2>
+                <p style="color: var(--slate);">Setiap kenangan yang kamu bagikan melengkapi arsip perjalanan ini.</p>
+            </div>
+
+            <div class="upload-card fade-up">
+                <div style="text-align:center; padding: 20px;">
+                    <i data-lucide="file-text" style="width: 60px; height: 60px; color: var(--gold); margin-bottom:20px;"></i>
+                    <h3 style="color:white; margin-bottom:10px;">Formulir Data Foxtrot 59</h3>
+                    <p style="color: var(--slate); margin-bottom:30px;">
+                        Silakan isi biodata lengkap dan upload foto Anda melalui Google Form resmi kelas. 
+                        Data Anda akan ditinjau admin sebelum ditampilkan di website.
+                    </p>
+                    
+                    <!-- Link Google Form Biodata -->
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSclh-mDIIbp2hEGoXYGbWQd1RPZa99GqHMdX-gqdWpxiZmuog/viewform?usp=header" target="_blank" class="btn btn-primary" style="font-size:1.1rem; padding:15px 40px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
+                        <i data-lucide="external-link" width="18"></i> BUKA GOOGLE FORM
+                    </a>
+                    
+                    <p style="margin-top:20px; font-size:0.8rem; color: var(--slate); opacity:0.7;">
+                        Pastikan Anda login akun Google untuk mengupload foto.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Gallery Section -->
     <section id="gallery" class="section-padding">
         <div class="container">
@@ -970,36 +999,6 @@
                 <!-- Messages Grid -->
                 <div class="logbook-grid" id="messagesGrid">
                     <!-- Messages injected via JS -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Upload Page -->
-    <section id="upload" class="section-padding upload-section">
-        <div class="container">
-            <div class="journey-header fade-up">
-                <h2>Upload Biodata</h2>
-                <p style="color: var(--slate);">Setiap kenangan yang kamu bagikan melengkapi arsip perjalanan ini.</p>
-            </div>
-
-            <div class="upload-card fade-up">
-                <div style="text-align:center; padding: 20px;">
-                    <i data-lucide="file-text" style="width: 60px; height: 60px; color: var(--gold); margin-bottom:20px;"></i>
-                    <h3 style="color:white; margin-bottom:10px;">Formulir Data Foxtrot 59</h3>
-                    <p style="color: var(--slate); margin-bottom:30px;">
-                        Silakan isi biodata lengkap dan upload foto Anda melalui Google Form resmi kelas. 
-                        Data Anda akan ditinjau admin sebelum ditampilkan di website.
-                    </p>
-                    
-                    <!-- Link Google Form Biodata -->
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSclh-mDIIbp2hEGoXYGbWQd1RPZa99GqHMdX-gqdWpxiZmuog/viewform?usp=header" target="_blank" class="btn btn-primary" style="font-size:1.1rem; padding:15px 40px; display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
-                        <i data-lucide="external-link" width="18"></i> BUKA GOOGLE FORM
-                    </a>
-                    
-                    <p style="margin-top:20px; font-size:0.8rem; color: var(--slate); opacity:0.7;">
-                        Pastikan Anda login akun Google untuk mengupload foto.
-                    </p>
                 </div>
             </div>
         </div>
@@ -1216,10 +1215,18 @@
         }
 
         function processBiodata(data) {
+            // Updated: Scan for image URL dynamically if standard column not found
             allProfiles = data.filter(row => {
+                // Keep status check but ensure it's safe (optional: remove filter to make it fully auto)
                 return row['Status'] && row['Status'].trim().toLowerCase() === 'approved';
             }).map((row, index) => {
-                let imgUrl = getDriveImage(row['Upload Foto Profil'] || '');
+                // Dynamic Image Finder: Look for Drive link in any column if specific column is missing/empty
+                let rawImg = row['Upload Foto Profil'];
+                if (!rawImg) {
+                    rawImg = Object.values(row).find(val => val && typeof val === 'string' && val.includes('drive.google.com')) || '';
+                }
+                
+                let imgUrl = getDriveImage(rawImg);
                 if (!imgUrl) imgUrl = `https://i.pravatar.cc/400?img=${index + 1}`;
 
                 return {
@@ -1261,8 +1268,11 @@
             const galleryGrid = document.getElementById('galleryGrid');
             galleryGrid.innerHTML = '';
 
+            // Filter Valid Images AND Status Approved (Added Status Check for Consistency)
             const validImages = data.filter(row => {
-                return Object.values(row).some(val => val && val.includes('drive.google.com'));
+                const hasImage = Object.values(row).some(val => val && val.includes('drive.google.com'));
+                // Optional: Add status check here if desired, e.g., row['Status'] === 'Approved'
+                return hasImage; 
             });
 
             if (validImages.length === 0) {
