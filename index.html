@@ -1058,6 +1058,10 @@
                             <span>HOBBY</span>
                             <strong id="modalHobby">Fishing</strong>
                         </div>
+                        <div class="meta-item">
+                            <span>INSTAGRAM</span>
+                            <strong id="modalIgDisplay">-</strong>
+                        </div>
                     </div>
 
                     <div class="detail-bio">
@@ -1229,6 +1233,14 @@
                 let imgUrl = getDriveImage(rawImg);
                 if (!imgUrl) imgUrl = `https://i.pravatar.cc/400?img=${index + 1}`;
 
+                // Smart find for Instagram
+                let igValue = row['Instagram'];
+                if (!igValue) {
+                    // Try to find a column that looks like instagram
+                    const igKey = Object.keys(row).find(key => key.toLowerCase().includes('instagram'));
+                    if (igKey) igValue = row[igKey];
+                }
+
                 return {
                     id: index,
                     name: row['Nama Lengkap'] || 'Tanpa Nama',
@@ -1239,7 +1251,7 @@
                     hobby: row['Hobby'] || '-',
                     motto: row['Motto Hidup'] || '-',
                     message: row['Pesan untuk Kelas'] || '',
-                    instagram: row['Instagram'] || '#',
+                    instagram: igValue || '#',
                     img: imgUrl,
                     timestamp: row['Timestamp']
                 };
@@ -1383,6 +1395,7 @@
             document.getElementById('modalHobby').innerText = profile.hobby;
             document.getElementById('modalMotto').innerText = `"${profile.motto}"`;
             document.getElementById('modalMessage').innerText = profile.message;
+            document.getElementById('modalIgDisplay').innerText = (profile.instagram && profile.instagram !== '#') ? profile.instagram : '-';
             
             // Reset AI Box
             document.getElementById('aiPrediction').style.display = 'none';
